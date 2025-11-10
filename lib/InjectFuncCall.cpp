@@ -131,14 +131,18 @@ bool LegacyInjectFuncCall::runOnModule(llvm::Module &M) {
 llvm::PassPluginLibraryInfo getInjectFuncCallPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "inject-func-call", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, ModulePassManager &MPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "inject-func-call") {
+            // PB.registerPipelineParsingCallback(
+            //     [](StringRef Name, ModulePassManager &MPM,
+            //        ArrayRef<PassBuilder::PipelineElement>) {
+            //       if (Name == "inject-func-call") {
+            //         MPM.addPass(InjectFuncCall());
+            //         return true;
+            //       }
+            //       return false;
+            //     });
+            PB.registerPipelineStartEPCallback(
+                [](ModulePassManager &MPM, llvm::OptimizationLevel Level) {
                     MPM.addPass(InjectFuncCall());
-                    return true;
-                  }
-                  return false;
                 });
           }};
 }
