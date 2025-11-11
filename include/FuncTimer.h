@@ -1,5 +1,5 @@
-#ifndef LLVM_TUTOR_INSTRUMENT_BASIC_H
-#define LLVM_TUTOR_INSTRUMENT_BASIC_H
+#ifndef LLVM_TUTOR_FuncTimer_H
+#define LLVM_TUTOR_FuncTimer_H
 
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"

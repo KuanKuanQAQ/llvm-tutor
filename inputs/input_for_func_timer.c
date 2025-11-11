@@ -1,12 +1,3 @@
-//=============================================================================
-// FILE:
-//      input_for_hello.c
-//
-// DESCRIPTION:
-//      Sample input file for HelloWorld and InjectFuncCall
-//
-// License: MIT
-//=============================================================================
 #include <stdio.h>
 #include <stdbool.h>
 

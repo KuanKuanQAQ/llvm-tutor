@@ -7,6 +7,7 @@ set(LLVM_TUTOR_PLUGINS
     ConvertFCmpEq
     FuncTimer
     InjectFuncCall
+    InjectTrampoline
     MBAAdd
     MBASub
     RIV
@@ -27,6 +28,8 @@ set(FuncTimer_SOURCES
   FuncTimer.cpp)
 set(InjectFuncCall_SOURCES
   InjectFuncCall.cpp)
+set(InjectTrampoline_SOURCES
+  InjectTrampoline.cpp)
 set(MBAAdd_SOURCES
   MBAAdd.cpp
   Ratio.cpp)
