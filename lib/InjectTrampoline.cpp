@@ -12,12 +12,13 @@ bool InjectTrampoline::runOnModule(Module &M) {
   bool Changed = false;
   LLVMContext &C = M.getContext();
 
-  // 声明 log 函数: void x(i8* funcName, i1 isExit)
+  // 声明 log 函数: void x(i8* funcName, i1 isExit, i64* callsite)
   FunctionCallee LogFunc = M.getOrInsertFunction(
       "x",
-      Type::getVoidTy(C),
-      Type::getInt8PtrTy(C),
-      Type::getInt1Ty(C)
+      Type::getVoidTy(C), // return void
+      Type::getInt8PtrTy(C),    // func name
+      Type::getInt1Ty(C),       // isExit
+      Type::getInt64Ty(C)       // callsite (as u64)
   );
 
   std::vector<Function*> ToProcess;
@@ -33,9 +34,10 @@ bool InjectTrampoline::runOnModule(Module &M) {
     if (F.getName() == "x")
       continue;
 
-    StringRef Name = F.getName();
+
     
     // 安全过滤
+    // StringRef Name = F.getName();
     // if (Name.startswith("early_") || Name.startswith("start_kernel"))
     //   continue;
     // if (Name.contains("idle") || Name.contains("schedule"))
@@ -86,7 +88,13 @@ bool InjectTrampoline::runOnModule(Module &M) {
 
     Value *FuncName = B.CreateGlobalStringPtr(OrigName);
     Value *EnterFlag = B.getInt1(false);
-    B.CreateCall(LogFunc, {FuncName, EnterFlag});
+
+    Function *RetAddrIntr = Intrinsic::getDeclaration(&M, Intrinsic::returnaddress); // 调用获取返回地址的函数
+    Value *Level = B.getInt32(0);
+    Value *RetAddr = B.CreateCall(RetAddrIntr, Level, "retaddr"); // i8*
+
+    Value *RetAddrI64 = B.CreatePtrToInt(RetAddr, B.getInt64Ty()); // 把 i8* 转成 i64
+    B.CreateCall(LogFunc, {FuncName, EnterFlag, RetAddrI64});
 
     std::vector<Value*> Args;
     for (auto &A : TempTramp->args())
@@ -96,7 +104,7 @@ bool InjectTrampoline::runOnModule(Module &M) {
     CallReal->setCallingConv(TempTramp->getCallingConv());
 
     Value *ExitFlag = B.getInt1(true);
-    B.CreateCall(LogFunc, {FuncName, ExitFlag});
+    B.CreateCall(LogFunc, {FuncName, ExitFlag, RetAddrI64});
 
     if (TempTramp->getReturnType()->isVoidTy())
       B.CreateRetVoid();

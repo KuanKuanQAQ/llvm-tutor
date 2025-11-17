@@ -6,9 +6,10 @@
 int apple(int);
 int beer(int, int);
 
-void x(char *funcName, bool isExit) {
+void x(char *funcName, bool isExit, char* callsite) {
   if (!isExit) {
     printf("entry %s\n", funcName);
+    printf("callsite is %llu\n", callsite);
   } else {
     printf("exit %s\n", funcName);
   }
